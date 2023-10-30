@@ -1,4 +1,4 @@
-module github.com/ilyakaznacheev/cleanenv
+module github.com/inhuman/cleanenv
 
 require (
 	github.com/BurntSushi/toml v1.2.1
@@ -7,4 +7,4 @@ require (
 	olympos.io/encoding/edn v0.0.0-20201019073823-d3554ca0b0a3
 )
 
-go 1.13
+go 1.21
