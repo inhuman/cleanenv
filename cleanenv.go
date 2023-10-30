@@ -238,8 +238,8 @@ func parseMap(valueType reflect.Type, value string, sep string, layout *string) 
 	return &mapValue, nil
 }
 
-// structMeta is a structure metadata entity
-type structMeta struct {
+// StructMeta is a structure metadata entity
+type StructMeta struct {
 	envList     []string
 	fieldName   string
 	fieldValue  reflect.Value
@@ -251,8 +251,20 @@ type structMeta struct {
 	required    bool
 }
 
+func (sm *StructMeta) EnvList() []string {
+	return sm.envList
+}
+
+func (sm *StructMeta) FieldName() string {
+	return sm.fieldName
+}
+
+func (sm *StructMeta) DefValue() *string {
+	return sm.defValue
+}
+
 // isFieldValueZero determines if fieldValue empty or not
-func (sm *structMeta) isFieldValueZero() bool {
+func (sm *StructMeta) isFieldValueZero() bool {
 	return sm.fieldValue.IsZero()
 }
 
@@ -297,15 +309,15 @@ var validStructs = map[reflect.Type]parseFunc{
 	},
 }
 
-// readStructMetadata reads structure metadata (types, tags, etc.)
-func readStructMetadata(cfgRoot interface{}) ([]structMeta, error) {
+// ReadStructMetadata reads structure metadata (types, tags, etc.)
+func ReadStructMetadata(cfgRoot interface{}) ([]StructMeta, error) {
 	type cfgNode struct {
 		Val    interface{}
 		Prefix string
 	}
 
 	cfgStack := []cfgNode{{cfgRoot, ""}}
-	metas := make([]structMeta, 0)
+	metas := make([]StructMeta, 0)
 
 	for i := 0; i < len(cfgStack); i++ {
 
@@ -382,7 +394,7 @@ func readStructMetadata(cfgRoot interface{}) ([]structMeta, error) {
 				}
 			}
 
-			metas = append(metas, structMeta{
+			metas = append(metas, StructMeta{
 				envList:     envList,
 				fieldName:   s.Type().Field(idx).Name,
 				fieldValue:  s.Field(idx),
@@ -402,7 +414,7 @@ func readStructMetadata(cfgRoot interface{}) ([]structMeta, error) {
 
 // readEnvVars reads environment variables to the provided configuration structure
 func readEnvVars(cfg interface{}, update bool) error {
-	metaInfo, err := readStructMetadata(cfg)
+	metaInfo, err := ReadStructMetadata(cfg)
 	if err != nil {
 		return err
 	}
@@ -567,7 +579,7 @@ func parseValue(field reflect.Value, value, sep string, layout *string) error {
 // GetDescription returns a description of environment variables.
 // You can provide a custom header text.
 func GetDescription(cfg interface{}, headerText *string) (string, error) {
-	meta, err := readStructMetadata(cfg)
+	meta, err := ReadStructMetadata(cfg)
 	if err != nil {
 		return "", err
 	}
